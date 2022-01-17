@@ -1,0 +1,20 @@
+{
+  "name": "Booking",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zakaria2105/Booking.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zakaria2105/Booking/issues"
+  },
+  "homepage": "https://github.com/zakaria2105/Booking#readme"
+}
