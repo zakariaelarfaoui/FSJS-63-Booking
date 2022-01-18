@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/zakaria2105/Booking/issues"
   },
-  "homepage": "https://github.com/zakaria2105/Booking#readme"
+  "homepage": "https://github.com/zakaria2105/Booking#readme",
+  "dependencies": {
+    "express": "^4.17.2"
+  }
 }
