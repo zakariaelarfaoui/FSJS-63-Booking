@@ -1,4 +1,5 @@
 const express = require("express");
+const authRoutes = require("./routes/auth");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 
@@ -19,7 +20,9 @@ mongoose
     console.error("Mongo Connection Error", err);
   });
 
-
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use("/", authRoutes);
 
 app.listen(PORT, () =>
   console.log(`server running on http://localhost:${PORT}`)
