@@ -65,4 +65,34 @@ userController.login = async (req, res) => {
   res.header("auth-token", token).send(token);
 };
 
+userController.activateAccount = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    if (!email || !code) return res.status(400).send("booth fields required");
+    const user = await User.findOne({
+      email: email,
+      emailToken: code,
+    });
+    if (!user) return res.status(400).send("Email doesn't exist");
+    if (user.emailToken < Date.now())
+      return res.status(400).send("activation code expired");
+    if (!user) {
+      return res.status(400).send("Invalid details");
+    } else {
+      if (user.active) return res.status(400).send("Account already activated");
+      user.emailToken = "";
+      user.emailTokenExpires = null;
+      user.active = true;
+      await user.save();
+      return res.status(200).send("Account activated.");
+    }
+  } catch (error) {
+    console.error("activation-error", error);
+    return res.status(500).json({
+      error: true,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = userController;
