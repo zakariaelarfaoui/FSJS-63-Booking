@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { emailConfirmation } = require("../helpers/emailConfirmation");
+const mailer = require("../helpers/mailer");
 
 const {
   registerValidation,
@@ -17,24 +17,41 @@ userController.register = async (req, res) => {
     if (result.error) return res.status(400).send(result.error.message);
     //Check if the email has been already registered.
     let user = await User.findOne({ email: result.value.email });
-    if (user) return res.json({ message: "Email is already in use" });
+    if (user) return res.json({ message: "Email is already exist" });
+
     // hashing password
     const salt = await bcrypt.genSalt(10);
     result.value.password = await bcrypt.hash(result.value.password, salt);
-    let code = Math.floor(100000 + Math.random() * 900000); //Generate random 6 digit code.
-    let expiry = Date.now() + 60 * 1000 * 15; //Set expiry 15 mins ahead from now
+
+    // create user
+    const newUser = new User(result.value);
+    await newUser.save();
     // send email
-    const sendCode = await emailConfirmation(result.value.email, code);
+    const token = jwt.sign({ _id: newUser.id }, process.env.TOKEN_SECRET_KEY, {
+      expiresIn: "900s",
+    });
+    console.log(token);
+    const subject = "Email confirmation";
+    const content = `<!DOCTYPE>
+    <html>
+      <body>
+        <h3>Hi ${newUser.firstName} ${newUser.lastName}</h3>
+        <p>We just need to verify your email address before you can access .</p>
+        <a href="http://localhost:5000/email-confirmation/${token}" target="_blank" style="text-decoration: none;"><button style="text-align: center;text-decoration: none;background-color: #4eb5f1;color: #ffffff;border: 1px solid #4eb5f1;padding: 10px 30px;border-radius: 25px;display: block;margin: 20px;">Verify Now</button></a>
+        <span>This verification will expire in 15 minutes.</span>
+      </body>
+    </html>`;
+    // const sendCode = await emailConfirmation(result.value.email, code);
+    const sendCode = await mailer(result.value.email, subject, content);
     if (sendCode.error)
       return res
         .status(500)
         .json({ message: "Couldn't send verification email." });
-    result.value.emailToken = code;
-    result.value.emailTokenExpires = new Date(expiry);
-    // create user
-    const newUser = new User(result.value);
-    await newUser.save();
-    return res.status(200).json({ message: "Registration Success" });
+    return res.status(200).send(
+      `We have sent an email with a confirmation link to your email address. In order to complete the sign-up process, please click the confirmation link.
+
+      If you do not receive a confirmation email, please check your spam folder. Also, please verify that you entered a valid email address in our sign-up form.`
+    );
   } catch (error) {
     console.error("signup-error", error);
     return res.status(500).json({ message: "Cannot Register" });
@@ -47,7 +64,10 @@ userController.login = async (req, res) => {
   const user = await User.findOne({ email: result.value.email });
   if (!user) return res.status(404).send("Email doesn't exist");
   // Throw error if account is not activated
-  if (!user.active) return res.status(400).json({ message: "You must verify your email to activate your account"});
+  if (!user.active)
+    return res
+      .status(400)
+      .json({ message: "You must verify your email to activate your account" });
   const validPassword = await bcrypt.compare(req.body.password, user.password);
   if (!validPassword) return res.status(400).send("password wrong");
 
@@ -67,31 +87,16 @@ userController.login = async (req, res) => {
 
 userController.activateAccount = async (req, res) => {
   try {
-    const { email, code } = req.body;
-    if (!email || !code) return res.status(400).send("booth fields required");
-    const user = await User.findOne({
-      email: email,
-      emailToken: code,
-    });
-    if (!user) return res.status(400).send("Email doesn't exist");
-    if (user.emailToken < Date.now())
-      return res.status(400).send("activation code expired");
-    if (!user) {
-      return res.status(400).send("Invalid details");
-    } else {
-      if (user.active) return res.status(400).send("Account already activated");
-      user.emailToken = "";
-      user.emailTokenExpires = null;
-      user.active = true;
-      await user.save();
-      return res.status(200).send("Account activated.");
-    }
+    const { token } = req.params;
+    const payload = jwt.verify(token, process.env.TOKEN_SECRET_KEY);
+    const user = await User.findOne({ id: payload._id });
+    if (user.active) return res.status(400).send("Account already activated");
+    user.active = true;
+    user.save();
+    return res.status(200).send("Your login was successful!");
   } catch (error) {
-    console.error("activation-error", error);
-    return res.status(500).json({
-      error: true,
-      message: error.message,
-    });
+    console.log(error);
+    return res.status(400).send("activation link expired");
   }
 };
 

@@ -8,8 +8,6 @@ const userSchema = mongoose.Schema(
     role: { type: Number, default: 0 },
     active: { type: Boolean, default: false },
     password: { type: String, required: true, min: 8 },
-    emailToken: { type: String, default: null },
-    emailTokenExpires: { type: Date, default: null },
   },
   {
     timestamps: {
