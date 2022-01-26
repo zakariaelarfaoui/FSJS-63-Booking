@@ -6,6 +6,7 @@ const mailer = require("../helpers/mailer");
 const {
   registerValidation,
   loginValidation,
+  resetPasswordValidation,
 } = require("../validation/authValidation");
 
 const userController = {};
@@ -88,7 +89,9 @@ userController.activateAccount = async (req, res) => {
   try {
     const { token } = req.params;
     const payload = jwt.verify(token, process.env.TOKEN_SECRET_KEY);
-    const user = await User.findOne({ id: payload._id });
+    const user = await User.findOne({ _id: payload._id });
+    console.log(user);
+    console.log(payload);
     if (user.active) return res.status(400).send("Account already activated");
     user.active = true;
     user.save();
@@ -105,9 +108,13 @@ userController.forgotPassword = async (req, res) => {
     if (!email) return res.send("Insert email");
     const user = await User.findOne({ email: email });
     // send email
-    const token = jwt.sign({ _id: user.id }, process.env.TOKEN_SECRET_KEY, {
-      expiresIn: "900s",
-    });
+    const token = jwt.sign(
+      { _id: user.id },
+      process.env.TOKEN_SECRET_KEY + user.password,
+      {
+        expiresIn: "900s",
+      }
+    );
     const subject = "Reset password";
     const content = `<!DOCTYPE>
     <html>
@@ -116,11 +123,10 @@ userController.forgotPassword = async (req, res) => {
         <p style="margin-bottom: 10px;">Forgot password?</p>
         <p style="margin-bottom: 10px;">We receive a request to reset your password.</p>
         <p>to reset your password, Click on the button below:</p>
-        <a href="http://localhost:5000/password-reset/${token}" target="_blank" style="text-decoration: none;"><button style="text-align: center;text-decoration: none;background-color: #4eb5f1;color: #ffffff;border: 1px solid #4eb5f1;padding: 10px 30px;border-radius: 25px;display: block;margin: 20px;">Verify Now</button></a>
+        <a href="http://localhost:5000/password-reset/${token}/${user.id}" target="_blank" style="text-decoration: none;"><button style="text-align: center;text-decoration: none;background-color: #4eb5f1;color: #ffffff;border: 1px solid #4eb5f1;padding: 10px 30px;border-radius: 25px;display: block;margin: 20px;">Verify Now</button></a>
         <span>This verification will expire in 15 minutes.</span>
       </body>
     </html>`;
-    // const sendCode = await emailConfirmation(result.value.email, code);
     const sendCode = await mailer(user.email, subject, content);
     if (sendCode.error)
       return res
@@ -133,6 +139,48 @@ userController.forgotPassword = async (req, res) => {
       );
   } catch (error) {
     console.log(error);
+  }
+};
+
+userController.resetPasswordGet = async (req, res) => {
+  try {
+    const { id, token } = req.params;
+    const user = await User.findOne({ _id: id });
+    console.log(user);
+    console.log(token);
+    const payload = jwt.verify(
+      token,
+      process.env.TOKEN_SECRET_KEY + user.password
+    );
+    console.log(payload);
+    // if (payload) {
+    //   return res.send(payload, "exist");
+    // } else {
+    //   return res.send(payload, "not exist");
+    // }
+    // const user = await User.findOne({ _id: payload._id });
+    // return res.send(user);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).send("Invalid link or expired");
+  }
+};
+
+userController.resetPasswordPost = async (req, res) => {
+  try {
+    const { password, confirmPassword, token } = req.body;
+    const result = resetPasswordValidation({ password, confirmPassword });
+    if (result.error) return res.status(400).send(result.error.message);
+    const payload = jwt.verify(token, process.env.TOKEN_SECRET_KEY);
+    const user = await User.findOne({ _id: payload._id });
+    // hashing password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(result.value.password, salt);
+    user.save();
+    res.send("password updated");
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).send("Something went wrong");
   }
 };
 
