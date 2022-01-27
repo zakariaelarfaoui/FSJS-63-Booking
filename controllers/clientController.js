@@ -41,24 +41,4 @@ const deleteClient = async (req, res) => {
   }
 };
 
-const index = async (req, res) => {
-  try {
-    const clients = await User.find({ role: 0 });
-    if (!clients) return res.status(404).send("something went wrong");
-    return res.status(200).send(clients);
-  } catch (error) {
-    console.log(error.message);
-    res.status(500).send(error.message);
-  }
-};
-
-const show = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const user = await User.findById(id);
-    if (!user) return res.status(404).send("something went wrong");
-    return res.status(200).send(user);
-  } catch (error) {}
-};
-
 module.exports = { create, update, deleteClient, index, show };
