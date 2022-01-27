@@ -5,7 +5,7 @@ const clientValidation = require("../validation/clientValidation.js");
 const create = async (req, res) => {
   try {
     //   validate req.body
-    const result = clientValidation(req.body);
+    const result = clientValidation.createValidation(req.body);
     if (result.error) return res.status(400).send(result.error.message);
     // check if email exist
     const user = await User.findOne({ email: result.value.email });
@@ -27,4 +27,31 @@ const create = async (req, res) => {
   }
 };
 
-module.exports = { create };
+const update = async (req, res) => {
+  try {
+    const id = req.params.id;
+    //   validate req.body
+    const result = clientValidation.updateValidation(req.body);
+    if (result.error) return res.status(500).send(result.error.message);
+    // update client
+    const client = await User.findById(id);
+    (client.firstName = result.value.firstName),
+      (client.lastName = result.value.lastName),
+      (client.email = result.value.email),
+      (client.role = result.value.role),
+      (client.active = result.value.active),
+      client
+        .save()
+        .then(() => {
+          return res.status(200).send("client updated");
+        })
+        .catch((err) => {
+          res.status(500).send("something went wrong", err.message);
+        });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).send(error.message);
+  }
+};
+
+module.exports = { create, update };
