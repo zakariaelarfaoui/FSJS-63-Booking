@@ -4,5 +4,6 @@ const clientController = require('../controllers/clientController.js')
 
 router.route("/create").post(clientController.create);
 router.route("/update/:id").post(clientController.update);
+router.route("/delete/:id").post(clientController.deleteClient);
 
 module.exports = router;
