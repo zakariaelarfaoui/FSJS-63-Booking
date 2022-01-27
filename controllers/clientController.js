@@ -5,7 +5,7 @@ const clientValidation = require("../validation/clientValidation.js");
 const create = async (req, res) => {
   try {
     //   validate req.body
-    const result = clientValidation.createValidation(req.body);
+    const result = clientValidation(req.body);
     if (result.error) return res.status(400).send(result.error.message);
     // check if email exist
     const user = await User.findOne({ email: result.value.email });
@@ -21,6 +21,11 @@ const create = async (req, res) => {
     await client.save();
     if (!client) return res.status(500).send("client not created");
     return res.status(200).send("client added successfully");
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).send(error.message);
+  }
+};
 
 const update = async (req, res) => {
   try {
