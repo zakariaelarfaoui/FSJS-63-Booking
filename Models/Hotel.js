@@ -18,6 +18,11 @@ const hotelSchema = new mongoose.Schema(
     name: { type: String, required: true, unique: true },
     description: { type: String, required: true, minLength: "50" },
     type: { type: String, required: true },
+    images:
+    {
+        data: Buffer,
+        contentType: String
+    },
     rating: {
       type: String,
       required: true,
