@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const clientRoute = require("./routes/client.route")
 
 const app = express();
 dotenv.config();
@@ -24,3 +25,4 @@ mongoose
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use("/client", clientRoute)
