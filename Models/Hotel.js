@@ -11,6 +11,13 @@ const roomSchema = new mongoose.Schema({
   type: { type: String, required: true },
   numberOfPerson: { type: Number, required: true },
   prix: { type: String, required: true },
+  images: {
+    data: Buffer,
+    contentType: String,
+    required: true,
+    min: 4
+  },
+  isReserved: { type: Boolean, default: false},
 });
 
 const hotelSchema = new mongoose.Schema(
@@ -18,10 +25,12 @@ const hotelSchema = new mongoose.Schema(
     name: { type: String, required: true, unique: true },
     description: { type: String, required: true, minLength: "50" },
     type: { type: String, required: true },
-    images:
-    {
-        data: Buffer,
-        contentType: String
+    images: {
+      data: Buffer,
+      contentType: String,
+      required: true,
+      min: 4,
+      max: 8
     },
     rating: {
       type: String,
