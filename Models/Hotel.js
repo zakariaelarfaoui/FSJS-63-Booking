@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const User = require("./User");
 
 const addressSchema = new mongoose.Schema({
   street: { type: String, required: true },
@@ -6,32 +7,12 @@ const addressSchema = new mongoose.Schema({
   country: { type: String, required: true },
 });
 
-const roomSchema = new mongoose.Schema({
-  number: { type: Number, required: true, unique: true },
-  type: { type: String, required: true },
-  numberOfPerson: { type: Number, required: true },
-  prix: { type: String, required: true },
-  images: {
-    data: Buffer,
-    contentType: String,
-    required: true,
-    min: 4
-  },
-  isReserved: { type: Boolean, default: false},
-});
-
 const hotelSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, unique: true },
-    description: { type: String, required: true, minLength: "50" },
+    name: { type: String, unique: true, required: true },
+    description: { type: String, required: true },
     type: { type: String, required: true },
-    images: {
-      data: Buffer,
-      contentType: String,
-      required: true,
-      min: 4,
-      max: 8
-    },
+    images: { type: Array, required: true, min: 4, max: 8 },
     rating: {
       type: String,
       required: true,
@@ -43,12 +24,7 @@ const hotelSchema = new mongoose.Schema(
         required: true,
       },
     ],
-    rooms: [
-      {
-        type: roomSchema,
-        required: true,
-      },
-    ],
+    ownerId: { type: mongoose.Schema.ObjectId, ref: User },
   },
   {
     timestamps: true,
