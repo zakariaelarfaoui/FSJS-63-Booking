@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const Rooms = require("./Room");
 const User = require("./User");
 
 const addressSchema = new mongoose.Schema({
@@ -25,7 +24,7 @@ const hotelSchema = new mongoose.Schema(
         required: true,
       },
     ],
-    OwnerId: { type: mongoose.Schema.ObjectId, ref: User, required: true },
+    ownerId: { type: mongoose.Schema.ObjectId, ref: User },
   },
   {
     timestamps: true,
