@@ -1,5 +1,5 @@
 const Hotel = require("../Models/Hotel");
-const  hotelValidation  = require("../Validation/hotelValidation");
+const hotelValidation = require("../Validation/hotelValidation");
 
 const createHotel = async (req, res) => {
   try {
@@ -61,13 +61,11 @@ const updateHotel = async (req, res) => {
     hotel
       .save()
       .then((data) => {
-        res
-          .status(200)
-          .json({
-            error: false,
-            message: "Hotel updated successfully",
-            data: data,
-          });
+        res.status(200).json({
+          error: false,
+          message: "Hotel updated successfully",
+          data: data,
+        });
       })
       .catch((error) => {
         console.log(error.message);
@@ -79,4 +77,20 @@ const updateHotel = async (req, res) => {
   }
 };
 
-module.exports = { createHotel, updateHotel };
+const deleteHotel = async (req, res) => {
+  try {
+    const id = req.params.id;
+    await Hotel.deleteOne(id)
+      .then(() =>
+        res
+          .status(200)
+          .json({ error: false, message: "Hotel has been deleted" })
+      )
+      .catch((error) => {
+        console.log(error.message);
+        res.status(500).json({ error: true, message: error.message });
+      });
+  } catch (error) {}
+};
+
+module.exports = { createHotel, updateHotel, deleteHotel };
