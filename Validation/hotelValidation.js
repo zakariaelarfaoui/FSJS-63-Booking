@@ -1,11 +1,12 @@
 const joi = require("joi");
 
-const createHotelValidation = (data) => {
+const HotelValidation = (data) => {
   const schema = joi.object({
+    ownerId: joi.string(),
     name: joi.string().required(),
     description: joi.string().required(),
     type: joi.string().required(),
-    // images: joi.array().min(4).max(8).required(),
+    images: joi.array().min(4).max(8),
     rating: joi
       .string()
       .required()
@@ -17,17 +18,8 @@ const createHotelValidation = (data) => {
         country: joi.string().required(),
       })
     ),
-    // rooms: joi.array().items(
-    //   joi.object({
-    //     number: joi.number().required(),
-    //     type: joi.string(),
-    //     numberOfPerson: joi.number(),
-    //     prix: joi.string(),
-    //     images: joi.array().min(4).required(),
-    //   })
-    // ),
   });
   return schema.validate(data);
 };
 
-module.exports = { createHotelValidation };
+module.exports = HotelValidation;
