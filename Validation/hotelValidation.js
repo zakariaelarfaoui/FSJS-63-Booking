@@ -1,6 +1,6 @@
 const joi = require("joi");
 
-const createHotelValidation = (data) => {
+const HotelValidation = (data) => {
   const schema = joi.object({
     ownerId: joi.string(),
     name: joi.string().required(),
@@ -22,4 +22,4 @@ const createHotelValidation = (data) => {
   return schema.validate(data);
 };
 
-module.exports = { createHotelValidation };
+module.exports = HotelValidation;
