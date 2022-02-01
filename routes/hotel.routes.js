@@ -9,5 +9,6 @@ router
   .route("/update/:id")
   .put(upload.array("images", 8), hotelController.updateHotel);
 router.route("/delete/:id").delete(hotelController.deleteHotel);
+router.route("/").get(hotelController.allHotels);
 
 module.exports = router;
