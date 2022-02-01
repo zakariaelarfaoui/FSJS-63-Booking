@@ -93,7 +93,7 @@ const deleteHotel = async (req, res) => {
   } catch (error) {}
 };
 
-const allHotels = async (req, res) => {
+const getAllHotels = async (req, res) => {
   try {
     await Hotel.find()
       .then((result) => res.status(200).json({ error: false, Hotels: result }))
@@ -106,4 +106,24 @@ const allHotels = async (req, res) => {
   }
 };
 
-module.exports = { createHotel, updateHotel, deleteHotel, allHotels };
+const getOneHotel = async (req, res) => {
+  try {
+    const id = req.params.id;
+    await Hotel.findById(id)
+      .then((result) => res.status(200).json({ error: false, Hotel: result }))
+      .catch((error) =>
+        res.status(400).json({ error: true, message: error.message })
+      );
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: true, message: error.message });
+  }
+};
+
+module.exports = {
+  createHotel,
+  updateHotel,
+  deleteHotel,
+  getAllHotels,
+  getOneHotel,
+};
