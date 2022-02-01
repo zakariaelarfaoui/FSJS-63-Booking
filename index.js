@@ -1,10 +1,10 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const dotenv = require("dotenv");
-const clientRoute = require("./routes/client.route")
+const dotenv = require("dotenv").config();
+
+const routes = require("./routes/index.routes");
 
 const app = express();
-dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 
@@ -23,6 +23,6 @@ mongoose
     console.log(err.message);
   });
 
-app.use(express.json());
+  app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use("/client", clientRoute)
+app.use("/", routes);
