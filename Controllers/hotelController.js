@@ -3,7 +3,7 @@ const hotelValidation = require("../Validation/hotelValidation");
 
 const createHotel = async (req, res) => {
   try {
-    const result = hotelValidation.createHotelValidation(req.body);
+    const result = hotelValidation(req.body);
     if (result.error) return res.status(400).send(result.error.message);
     let hotel = await Hotel.findOne({ name: result.value.name });
     if (hotel)
@@ -93,4 +93,17 @@ const deleteHotel = async (req, res) => {
   } catch (error) {}
 };
 
-module.exports = { createHotel, updateHotel, deleteHotel };
+const allHotels = async (req, res) => {
+  try {
+    await Hotel.find()
+      .then((result) => res.status(200).json({ error: false, Hotels: result }))
+      .catch((error) =>
+        res.status(400).json({ error: true, message: error.message })
+      );
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: true, message: error.message });
+  }
+};
+
+module.exports = { createHotel, updateHotel, deleteHotel, allHotels };
