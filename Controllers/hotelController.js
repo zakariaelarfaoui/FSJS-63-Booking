@@ -4,7 +4,10 @@ const hotelValidation = require("../Validation/hotelValidation");
 const createHotel = async (req, res) => {
   try {
     const result = hotelValidation(req.body);
-    if (result.error) return res.status(400).send(result.error.message);
+    if (result.error)
+      return res
+        .status(400)
+        .json({ error: true, message: result.error.message });
     let hotel = await Hotel.findOne({ name: result.value.name });
     if (hotel)
       return res.status(400).json({
@@ -15,7 +18,6 @@ const createHotel = async (req, res) => {
       return file.path;
     });
     result.value.images = images;
-
     hotel = new Hotel(result.value);
     await hotel
       .save()
@@ -46,12 +48,12 @@ const updateHotel = async (req, res) => {
     if (result.error)
       return res
         .status(400)
-        .json({ error: true, message: result.error, data: result.data });
+        .json({ error: true, message: result.error.message, data: result.data });
     const hotel = await Hotel.findById(id);
     if (!hotel)
       return res
-        .status(404)
-        .json({ error: true, message: "Something went wrong", data: hotel });
+        .status(400)
+        .json({ error: true, message: error.message, data: hotel });
     hotel.name = result.value.name;
     hotel.description = result.value.description;
     hotel.type = result.value.type;
@@ -80,7 +82,7 @@ const updateHotel = async (req, res) => {
 const deleteHotel = async (req, res) => {
   try {
     const id = req.params.id;
-    await Hotel.deleteOne(id)
+    await Hotel.deleteOne({ _id: id })
       .then(() =>
         res
           .status(200)
@@ -90,7 +92,10 @@ const deleteHotel = async (req, res) => {
         console.log(error.message);
         res.status(500).json({ error: true, message: error.message });
       });
-  } catch (error) {}
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: true, message: error.message });
+  }
 };
 
 const getAllHotels = async (req, res) => {
