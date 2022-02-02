@@ -40,7 +40,7 @@ const createRoom = async (req, res) => {
 
 const updateRoom = async (req, res) => {
   try {
-    const id = req.params.id
+    const id = req.params.id;
     const result = roomValidation(req.body);
     if (result.error)
       return res.status(400).json({
@@ -81,4 +81,21 @@ const updateRoom = async (req, res) => {
   }
 };
 
-module.exports = { createRoom, updateRoom };
+const deleteRoom = async (req, res) => {
+  try {
+    const id = req.params.id;
+    await Room.deleteOne({ _id: id })
+      .then(() =>
+        res.status(200).json({ error: false, message: "Room has been deleted" })
+      )
+      .catch((error) => {
+        console.log(error.message);
+        res.status(400).json({ error: true, message: error.message });
+      });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: true, message: error.message });
+  }
+};
+
+module.exports = { createRoom, updateRoom, deleteRoom };
