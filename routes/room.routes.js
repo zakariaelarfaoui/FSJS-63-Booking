@@ -9,5 +9,6 @@ router
 router
   .route("/update/:id")
   .put(upload.array("images", 8), roomController.updateRoom);
+router.route("/delete/:id").delete(roomController.deleteRoom);
 
 module.exports = router;
