@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Hotel = require("./Hotel");
+
 const roomSchema = new mongoose.Schema(
   {
     number: { type: Number, unique: true },
@@ -8,7 +9,11 @@ const roomSchema = new mongoose.Schema(
     price: { type: String, required: true },
     images: { type: Array, required: true, min: 8, max: 8 },
     isReserved: { type: Boolean, default: false },
-    hotelId: { type: mongoose.Schema.ObjectId, ref: Hotel, required: true },
+    hotelId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: Hotel,
+      required: true,
+    },
   },
   {
     timestamps: true,
