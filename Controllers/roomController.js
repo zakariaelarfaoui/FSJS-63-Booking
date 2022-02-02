@@ -112,4 +112,25 @@ const getAllRooms = async (req, res) => {
   }
 };
 
-module.exports = { createRoom, updateRoom, deleteRoom, getAllRooms };
+const getOneRoom = async (req, res) => {
+  try {
+    const id = req.params.id;
+    await Room.findById(id)
+      .then((result) => res.status(200).json({ error: false, date: result }))
+      .catch((error) => {
+        console.log(error.message);
+        res.status(400).json({ error: true, message: error.message });
+      });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: true, message: error.message });
+  }
+};
+
+module.exports = {
+  createRoom,
+  updateRoom,
+  deleteRoom,
+  getAllRooms,
+  getOneRoom,
+};
