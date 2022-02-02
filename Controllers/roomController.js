@@ -98,4 +98,18 @@ const deleteRoom = async (req, res) => {
   }
 };
 
-module.exports = { createRoom, updateRoom, deleteRoom };
+const getAllRooms = async (req, res) => {
+  try {
+    await Room.find()
+      .then((result) => res.status(200).json({ error: false, Rooms: result }))
+      .catch((error) => {
+        console.log(error.message);
+        res.status(400).json({ error: true, message: error.message });
+      });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: true, message: error.message });
+  }
+};
+
+module.exports = { createRoom, updateRoom, deleteRoom, getAllRooms };
