@@ -12,21 +12,22 @@ const userController = {};
 
 userController.register = async (req, res) => {
   try {
-    // validate user input
     const result = registerValidation(req.body);
-    if (result.error) return res.status(400).send(result.error.message);
-    //Check if the email has been already registered.
+    if (result.error)
+      return res
+        .status(400)
+        .json({ error: true, message: result.error.message });
     let user = await User.findOne({ email: result.value.email });
-    if (user) return res.json({ message: "Email is already exist" });
+    if (user)
+      return res
+        .status(400)
+        .json({ error: true, message: "Email is already exist" });
 
-    // hashing password
     const salt = await bcrypt.genSalt(10);
     result.value.password = await bcrypt.hash(result.value.password, salt);
 
-    // create user
     const newUser = new User(result.value);
     await newUser.save();
-    // send email
     const token = jwt.sign({ _id: newUser.id }, process.env.TOKEN_SECRET_KEY, {
       expiresIn: "900s",
     });
@@ -40,35 +41,40 @@ userController.register = async (req, res) => {
         <span>This verification will expire in 15 minutes.</span>
       </body>
     </html>`;
-    // const sendCode = await emailConfirmation(result.value.email, code);
     const sendCode = await mailer(result.value.email, subject, content);
     if (sendCode.error)
       return res
         .status(500)
-        .json({ message: "Couldn't send verification email." });
-    return res.status(200).send(
-      `We have sent an email with a confirmation link to your email address. In order to complete the sign-up process, please click the confirmation link.
+        .json({ error: true, message: "Couldn't send verification email." });
+    return res.status(200).json({
+      error: false,
+      message: `We have sent an email with a confirmation link to your email address. In order to complete the sign-up process, please click the confirmation link.
 
-      If you do not receive a confirmation email, please check your spam folder. Also, please verify that you entered a valid email address in our sign-up form.`
-    );
+      If you do not receive a confirmation email, please check your spam folder. Also, please verify that you entered a valid email address in our sign-up form.`,
+    });
   } catch (error) {
-    console.error("signup-error", error);
-    return res.status(500).json({ message: "Cannot Register" });
+    console.log(error.message);
+    res.status(500).json({ error: true, message: error.message });
   }
 };
 
 userController.login = async (req, res) => {
   const result = loginValidation(req.body);
-  if (result.error) return res.status(400).send(result.error.message);
+  if (result.error)
+    return res.status(400).json({ error: true, message: result.error.message });
   const user = await User.findOne({ email: result.value.email });
-  if (!user) return res.status(404).send("Email doesn't exist");
-  // Throw error if account is not activated
-  if (!user.active)
+  if (!user)
     return res
       .status(400)
-      .json({ message: "You must verify your email to activate your account" });
+      .json({ error: true, message: "Email doesn't exist" });
+  if (!user.active)
+    return res.status(400).json({
+      error: true,
+      message: "You must verify your email to activate your account",
+    });
   const validPassword = await bcrypt.compare(req.body.password, user.password);
-  if (!validPassword) return res.status(400).send("password wrong");
+  if (!validPassword)
+    return res.status(400).json({ error: true, message: "password wrong" });
 
   const token = jwt.sign(
     {
@@ -81,7 +87,10 @@ userController.login = async (req, res) => {
     },
     process.env.TOKEN_SECRET_KEY
   );
-  res.header("auth-token", token).send(token);
+  res
+    .status(200)
+    .header("auth-token", token)
+    .json({ error: false, token: token });
 };
 
 userController.activateAccount = async (req, res) => {
@@ -89,22 +98,27 @@ userController.activateAccount = async (req, res) => {
     const { token } = req.params;
     const payload = jwt.verify(token, process.env.TOKEN_SECRET_KEY);
     const user = await User.findOne({ id: payload._id });
-    if (user.active) return res.status(400).send("Account already activated");
+    if (user.active)
+      return res
+        .status(400)
+        .json({ error: true, message: "Account already activated" });
     user.active = true;
     user.save();
-    return res.status(200).send("Your login was successful!");
+    return res
+      .status(200)
+      .json({ error: false, message: "Account activated successful!" });
   } catch (error) {
-    console.log(error);
-    return res.status(400).send("activation link expired");
+    console.log(error.message);
+    res.status(400).json({ error: true, message: "activation link expired" });
   }
 };
 
 userController.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email) return res.send("Insert email");
+    if (!email)
+      return res.status(400).json({ error: true, message: "Email required" });
     const user = await User.findOne({ email: email });
-    // send email
     const token = jwt.sign({ _id: user.id }, process.env.TOKEN_SECRET_KEY, {
       expiresIn: "900s",
     });
@@ -120,19 +134,18 @@ userController.forgotPassword = async (req, res) => {
         <span>This verification will expire in 15 minutes.</span>
       </body>
     </html>`;
-    // const sendCode = await emailConfirmation(result.value.email, code);
     const sendCode = await mailer(user.email, subject, content);
     if (sendCode.error)
       return res
         .status(500)
-        .json({ message: "Couldn't send Reset password email." });
-    return res
-      .status(200)
-      .send(
-        `We have sent you an email with a confirmation link to reset your password`
-      );
+        .json({ error: true, message: "Couldn't send Reset password email." });
+    return res.status(200).json({
+      error: false,
+      message: `We have sent you an email with a confirmation link to reset your password`,
+    });
   } catch (error) {
-    console.log(error);
+    console.log(error.message);
+    res.status(500).json({ error: true, message: error.message });
   }
 };
 
