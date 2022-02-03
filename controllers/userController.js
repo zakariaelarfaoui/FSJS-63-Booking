@@ -1,10 +1,10 @@
 const User = require("../Models/User");
 const bcrypt = require("bcryptjs");
-const clientValidation = require("../validation/clientValidation.js");
+const userValidation = require("../validation/userValidation.js");
 
 const create = async (req, res) => {
   try {
-    const result = clientValidation.createValidation(req.body);
+    const result = userValidation.createValidation(req.body);
     if (result.error)
       return res
         .status(400)
@@ -37,7 +37,7 @@ const create = async (req, res) => {
 const update = async (req, res) => {
   try {
     const id = req.params.id;
-    const result = clientValidation.updateValidation(req.body);
+    const result = userValidation.updateValidation(req.body);
     if (result.error)
       return res
         .status(500)
