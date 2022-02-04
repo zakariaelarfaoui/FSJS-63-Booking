@@ -2,9 +2,11 @@ const router = require("express").Router();
 const hotelRoutes = require("./hotel.routes");
 const userRoutes = require("./user.routes");
 const authRoutes = require("./auth.routes");
+const { verifyAuth, verifyPermission } = require("../middleware/auth");
 
-router.use("/hotels", hotelRoutes);
-router.use("/clients", userRoutes);
 router.use("/", authRoutes);
+router.use(verifyAuth);
+router.use("/hotels", verifyPermission("owner"), hotelRoutes);
+router.use("/clients", verifyPermission("admin"), userRoutes);
 
 module.exports = router;
