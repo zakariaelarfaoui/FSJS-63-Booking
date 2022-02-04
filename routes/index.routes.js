@@ -7,6 +7,6 @@ const { verifyAuth, verifyPermission } = require("../middleware/auth");
 router.use("/", authRoutes);
 router.use(verifyAuth);
 router.use("/hotels", verifyPermission("owner"), hotelRoutes);
-router.use("/clients", verifyPermission("admin"), userRoutes);
+router.use("/users", verifyPermission("admin"), userRoutes);
 
 module.exports = router;
