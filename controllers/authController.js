@@ -8,9 +8,7 @@ const {
   loginValidation,
 } = require("../validation/authValidation");
 
-const userController = {};
-
-userController.register = async (req, res) => {
+const register = async (req, res) => {
   try {
     const result = registerValidation(req.body);
     if (result.error)
@@ -28,9 +26,14 @@ userController.register = async (req, res) => {
 
     const newUser = new User(result.value);
     await newUser.save();
-    const token = jwt.sign({ _id: newUser.id }, process.env.TOKEN_SECRET_KEY, {
-      expiresIn: "900s",
-    });
+    const token = jwt.sign(
+      { _id: newUser.id },
+      process.env.ACCESS_TOKEN_SECRET_KEY,
+      {
+        expiresIn: "900s",
+      }
+    );
+    console.log(token);
     const subject = "Email confirmation";
     const content = `<!DOCTYPE>
     <html>
@@ -58,7 +61,7 @@ userController.register = async (req, res) => {
   }
 };
 
-userController.login = async (req, res) => {
+const login = async (req, res) => {
   const result = loginValidation(req.body);
   if (result.error)
     return res.status(400).json({ error: true, message: result.error.message });
@@ -76,27 +79,46 @@ userController.login = async (req, res) => {
   if (!validPassword)
     return res.status(400).json({ error: true, message: "password wrong" });
 
-  const token = jwt.sign(
+  const accessToken = jwt.sign(
     {
       _id: user.id,
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
       role: user.role,
-      active: user.active,
     },
-    process.env.TOKEN_SECRET_KEY
+    process.env.ACCESS_TOKEN_SECRET_KEY,
+    { expiresIn: "15m" }
   );
-  res
-    .status(200)
-    .header("auth-token", token)
-    .json({ error: false, token: token });
+  const refreshToken = jwt.sign(
+    {
+      _id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role,
+    },
+    process.env.REFRESH_TOKEN_SECRET_KEY,
+    { expiresIn: "1d" }
+  );
+  user.refreshToken = refreshToken;
+  user.save();
+  res.cookie("jwt", refreshToken, {
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000,
+  });
+  res.status(200).json({
+    error: false,
+    accessToken: accessToken,
+    refreshToken: refreshToken,
+    user: user,
+  });
 };
 
-userController.activateAccount = async (req, res) => {
+const activateAccount = async (req, res) => {
   try {
     const { token } = req.params;
-    const payload = jwt.verify(token, process.env.TOKEN_SECRET_KEY);
+    const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY);
     const user = await User.findOne({ id: payload._id });
     if (user.active)
       return res
@@ -113,15 +135,19 @@ userController.activateAccount = async (req, res) => {
   }
 };
 
-userController.forgotPassword = async (req, res) => {
+const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
     if (!email)
       return res.status(400).json({ error: true, message: "Email required" });
     const user = await User.findOne({ email: email });
-    const token = jwt.sign({ _id: user.id }, process.env.TOKEN_SECRET_KEY, {
-      expiresIn: "900s",
-    });
+    const token = jwt.sign(
+      { _id: user.id },
+      process.env.ACCESS_TOKEN_SECRET_KEY,
+      {
+        expiresIn: "900s",
+      }
+    );
     const subject = "Reset password";
     const content = `<!DOCTYPE>
     <html>
@@ -149,4 +175,53 @@ userController.forgotPassword = async (req, res) => {
   }
 };
 
-module.exports = userController;
+const refreshToken = async (req, res) => {
+  const cookie = req.cookies;
+  if (!cookie?.jwt) return res.sendStatus(401);
+  const refreshToken = cookie.jwt;
+  const user = await User.count({ refreshToken: refreshToken });
+  if (!user) return res.sendStatus(403);
+  jwt.verify(
+    refreshToken,
+    process.env.REFRESH_TOKEN_SECRET_KEY,
+    (error, decoded) => {
+      if (error) return res.sendStatus(403);
+      const accessToken = jwt.sign(
+        {
+          _id: decoded.id,
+          firstName: decoded.firstName,
+          lastName: decoded.lastName,
+          email: decoded.email,
+          role: decoded.role,
+        },
+        process.env.ACCESS_TOKEN_SECRET_KEY,
+        { expiresIn: "15m" }
+      );
+      return res.status(201).json({ error: false, accessToken: accessToken });
+    }
+  );
+};
+
+const logout = async (req, res) => {
+  const cookie = req.cookies;
+  if (!cookie?.jwt) return res.sendStatus(204);
+  const refreshToken = cookie.jwt;
+  const user = await User.findOne({ refreshToken: refreshToken });
+  if (!user) {
+    res.clearCookie("jwt", { httpOnly: true });
+    return res.sendStatus(204);
+  }
+  user.refreshToken = null;
+  await user.save();
+  res.clearCookie("jwt", { httpOnly: true });
+  return res.sendStatus(204);
+};
+
+module.exports = {
+  register,
+  login,
+  forgotPassword,
+  logout,
+  activateAccount,
+  refreshToken,
+};
