@@ -1,13 +1,12 @@
 const router = require("express").Router();
 
-const authenticationController = require("../controllers/authenticationController");
+const authController = require("../controllers/authController");
 
-router.post("/register", authenticationController.register);
-router.post("/login", authenticationController.login);
-router.get(
-  "/email-confirmation/:token",
-  authenticationController.activateAccount
-);
-router.post("/forgot-password", authenticationController.forgotPassword);
+router.post("/register", authController.register);
+router.post("/login", authController.login);
+router.get("/activate-account/:token", authController.activateAccount);
+router.post("/forgot-password", authController.forgotPassword);
+router.route("/refresh-token").get(authController.refreshToken);
+router.route("/logout").get(authController.logout);
 
 module.exports = router;

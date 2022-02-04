@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv").config();
+const cookieParser = require("cookie-parser");
 
 const routes = require("./routes/index.routes");
 
@@ -23,6 +24,7 @@ mongoose
     console.log(err.message);
   });
 
-  app.use(express.json());
+app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use("/", routes);
