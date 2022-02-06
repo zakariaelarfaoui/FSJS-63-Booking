@@ -94,16 +94,24 @@ const updateHotel = async (req, res) => {
 const deleteHotel = async (req, res) => {
   try {
     const id = req.params.id;
-    await Hotel.deleteOne({ _id: id })
-      .then(() =>
-        res
-          .status(200)
-          .json({ error: false, message: "Hotel has been deleted" })
-      )
-      .catch((error) => {
-        console.log(error.message);
-        res.status(500).json({ error: true, message: error.message });
+    const hotel = await Hotel.exists({ _id: id });
+    if (!hotel)
+      return res.status(404).json({
+        error: true,
+        message: "Hotel doesn't exist or already deleted",
       });
+    if (
+      (req.user.role == "owner" && hotel.ownerId == req.user._id) ||
+      req.user.role == "admin"
+    ) {
+      const checkDelete = await Hotel.deleteOne({ _id: id });
+      if (checkDelete)
+        return res
+          .status(200)
+          .json({ error: false, message: "Hotel has been deleted" });
+    } else {
+      return res.sendStatus(403);
+    }
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: true, message: error.message });
