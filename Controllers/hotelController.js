@@ -120,11 +120,23 @@ const deleteHotel = async (req, res) => {
 
 const getAllHotels = async (req, res) => {
   try {
-    await Hotel.find()
-      .then((result) => res.status(200).json({ error: false, Hotels: result }))
-      .catch((error) =>
-        res.status(400).json({ error: true, message: error.message })
-      );
+    let filter = {};
+    let page = req.query.page ? parseInt(req.query.page, 10) : 0;
+    if (req.query.city) filter.city = req.query.city;
+    if (req.query.rating) filter.rating = req.query.rating;
+    if (req.query.type) filter.type = req.query.type;
+    if (req.user.role == "owner") filter.ownerId = req.user._id;
+    const hotels = await Hotel.find(filter)
+      .limit(20)
+      .skip(20 * page);
+    const numberOfHotels = await Hotel.countDocuments(filter);
+    return res.status(200).json({
+      error: false,
+      filter: filter,
+      numberOfHotels: numberOfHotels,
+      page: page,
+      Hotels: hotels,
+    });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: true, message: error.message });
