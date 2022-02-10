@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const roomController = require("../controllers/roomController");
-const upload = require("../middleware/multer");
+const upload = require("../helpers/multer");
 
 router
   .route("/create")
