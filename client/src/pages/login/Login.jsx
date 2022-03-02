@@ -56,37 +56,29 @@ function Login() {
     <section className="login">
       <div className="login-left">
         <h1 className="text-center mt-5">Sign in now</h1>
-        <form className="login-form">
-          <div className="mb-3">
-            <input
-              className="form-control"
-              type="email"
-              name="email"
-              id="email"
-              placeholder="Email"
-            />
+        {error && (
+          <div
+            className="alert alert-danger text-center w-75 mx-auto"
+            role="alert"
+          >
+            {error}
           </div>
-          <div className="mb-3">
-            <input
-              className="form-control"
-              type="password"
-              name="password"
-              id="password"
-              placeholder="Password"
-            />
-          </div>
-          <a href="#" className="d-block">Forgot your password?</a>
-          <input className="mt-3" type="submit" value="SIGN IN" />
-        </form>
+        )}
+        <LoginForm
+          handelLogin={handelLogin}
+          email={email}
+          handelChange={handelChange}
+          password={password}
+        />
       </div>
       <div className="login-right">
         <h3 className="mt-5">Lorem, ipsum dolor.</h3>
         <p className="my-5">
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Itaque, modi?
         </p>
-        <a className="mx-auto mt-3" href="#">
+        <Link to="/register" className="mx-auto mt-3">
           SIGN UP
-        </a>
+        </Link>
       </div>
     </section>
   );
