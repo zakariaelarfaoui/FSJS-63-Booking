@@ -1,15 +1,15 @@
-function RegisterForm({fistName, lastName, email, password, handelChange, handelRegister}) {
+function RegisterForm({firstName, lastName, email, password, handelChange, handelRegister}) {
   return (
     <form className="login-form" onSubmit={handelRegister}>
       <div className="mb-3 d-flex justify-content-between gap-3">
         <input
           className="form-control"
           type="text"
-          name="fistName"
-          id="fistName"
+          name="firstName"
+          id="firstName"
           required
-          placeholder="Fist Name"
-          value={fistName}
+          placeholder="First Name"
+          value={firstName}
           onChange={handelChange}
         />
         <input
