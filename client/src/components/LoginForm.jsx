@@ -9,6 +9,7 @@ function LoginForm({ handelLogin, email, handelChange, password }) {
           type="email"
           name="email"
           id="email"
+          required
           placeholder="Email"
           value={email}
           onChange={handelChange}
@@ -20,6 +21,7 @@ function LoginForm({ handelLogin, email, handelChange, password }) {
           type="password"
           name="password"
           id="password"
+          required
           placeholder="Password"
           value={password}
           onChange={handelChange}
