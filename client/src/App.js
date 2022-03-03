@@ -6,6 +6,7 @@ import Layout from "./components/Layout";
 import RequireAuth from "./components/RequireAuth";
 import Register from "./pages/Register/Register";
 import ActivateAccount from "./components/ActivateAccount";
+import ForgotPassword from "./pages/ForgotPassword";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/activate-account/:token" element={<ActivateAccount />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route element={<RequireAuth allowedUsers={["admin"]} />}>
             <Route path="/dashboard" element={<Dashboard />} />
           </Route>
