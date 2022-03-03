@@ -40,7 +40,7 @@ const register = async (req, res) => {
       <body>
         <h3>Hi ${newUser.firstName} ${newUser.lastName}</h3>
         <p>We just need to verify your email address before you can access .</p>
-        <a href="http://localhost:5000/email-confirmation/${token}" target="_blank" style="text-decoration: none;"><button style="text-align: center;text-decoration: none;background-color: #4eb5f1;color: #ffffff;border: 1px solid #4eb5f1;padding: 10px 30px;border-radius: 25px;display: block;margin: 20px;">Verify Now</button></a>
+        <a href="http://localhost:3000/activate-account/${token}" target="_blank" style="text-decoration: none;"><button style="text-align: center;text-decoration: none;background-color: #4eb5f1;color: #ffffff;border: 1px solid #4eb5f1;padding: 10px 30px;border-radius: 25px;display: block;margin: 20px;">Verify Now</button></a>
         <span>This verification will expire in 15 minutes.</span>
       </body>
     </html>`;
@@ -51,9 +51,7 @@ const register = async (req, res) => {
         .json({ error: true, message: "Couldn't send verification email." });
     return res.status(200).json({
       error: false,
-      message: `We have sent an email with a confirmation link to your email address. In order to complete the sign-up process, please click the confirmation link.
-
-      If you do not receive a confirmation email, please check your spam folder. Also, please verify that you entered a valid email address in our sign-up form.`,
+      message: `We have sent an email with a confirmation link to your email address. In order to complete the sign-up process, please click the confirmation link.If you do not receive a confirmation email, please check your spam folder. Also, please verify that you entered a valid email address in our sign-up form.`,
     });
   } catch (error) {
     console.log(error.message);
@@ -119,7 +117,7 @@ const activateAccount = async (req, res) => {
   try {
     const { token } = req.params;
     const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY);
-    const user = await User.findOne({ id: payload._id });
+    const user = await User.findById({ _id: payload._id });
     if (user.active)
       return res
         .status(400)
