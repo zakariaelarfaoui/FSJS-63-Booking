@@ -1,9 +1,30 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
+import axios from "../../api/axios";
 import Modal from "../../components/Modal";
 
+import { faCircleCheck, faCircleInfo } from "@fortawesome/free-solid-svg-icons";
+
 const ForgotPassword = () => {
+  const [email, setEmail] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(false);
+
+  const handelForgotPassword = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post("/forgot-password", { email });
+      setSuccess(response.data.message);
+    } catch (error) {
+      if (error.response) {
+        console.log(error.response.data.message);
+        setError(error.response.data.message);
+      } else {
+        console.log(error.message);
+      }
+    }
+  };
 
   const props = {
     title: "Check your email",
@@ -26,7 +47,7 @@ const ForgotPassword = () => {
 
   return (
     <>
-    {(success || error) && <Modal {...props} />}
+      {(success || error) && <Modal {...props} />}
       <section className="login">
         <div className="login-left">
           <h1 className="text-center mt-5">Forgot Password</h1>
