@@ -1,13 +1,18 @@
+import {faCircleCheck} from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import axios from "../../api/axios";
+
+import Modal from "../../components/Modal";
 
 const ResetPassword = () => {
   const { token } = useParams();
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+   const [success, setSuccess] = useState(true);
+   const [error, setError] = useState(false);
 
   const handelResetPassword = async (e) => {
     e.preventDefault();
@@ -19,17 +24,40 @@ const ResetPassword = () => {
       console.log(response.data);
     } catch (error) {
       if (error.response) {
-        console.error(error.response.data.message);
+        console.log(error.response.data.message);
+        setError(error.response.data.message)
       } else {
-        console.error(error.message);
+        console.log(error.message);
       }
     }
   };
+
+    const props = {
+      title: "Reset Password",
+      icon: faCircleCheck,
+      iconClassName: "d-block mt-3 mx-auto text-success",
+      message: success,
+      headerClassName: `popup-head text-center bg-success text-white`,
+      btnClassName: `btn btn-outline-success `,
+      btnContent: "Close",
+      setSuccess,
+      setError,
+    };
+
   return (
     <>
+      {success && <Modal {...props} />}
       <section className="login">
         <div className="login-left">
           <h1 className="text-center mt-5">Reset Password</h1>
+          {error && (
+            <div
+              className="alert alert-danger text-center w-75 mx-auto"
+              role="alert"
+            >
+              {error}
+            </div>
+          )}
           <form className="login-form" onSubmit={handelResetPassword}>
             <div className="mb-3">
               <input
