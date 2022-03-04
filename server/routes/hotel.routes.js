@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const hotelController = require("../Controllers/hotelController");
-const upload = require("../middleware/multer");
+const upload = require("../helpers/multer");
 
 router
   .route("/create")
