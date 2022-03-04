@@ -6,6 +6,7 @@ const mailer = require("../helpers/mailer");
 const {
   registerValidation,
   loginValidation,
+  resetPasswordValidation,
 } = require("../validation/authValidation");
 
 const register = async (req, res) => {
@@ -173,6 +174,38 @@ const forgotPassword = async (req, res) => {
   }
 };
 
+const resetPassword = async (req, res) => {
+  let payload;
+  const { token } = req.params;
+
+  try {
+    payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY);
+  } catch (error) {
+    console.log(error.message);
+    return res
+      .status(400)
+      .json({ error: true, message: "Reset password link expired or invalid" });
+  }
+
+  const result = resetPasswordValidation(req.body);
+  if (result.error)
+    res.status(400).json({ error: true, message: result.error.message });
+
+    try {
+      const user = await User.findById(payload._id).select('_id');
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(result.value.password, salt);
+      user.save((err, data) =>{
+        if(err) res.status(500).json({ error: true, message: err.message });
+        res.status(200).json({ error: true, message: 'password reset successfully' })
+      });
+    } catch (error) {
+      console.log(error.message)
+      return res.status(500).json({ error: true, message: error.message})
+    }
+};
+
+
 const refreshToken = async (req, res) => {
   const cookie = req.cookies;
   if (!cookie?.jwt) return res.sendStatus(401);
@@ -219,6 +252,7 @@ module.exports = {
   register,
   login,
   forgotPassword,
+  resetPassword,
   logout,
   activateAccount,
   refreshToken,
