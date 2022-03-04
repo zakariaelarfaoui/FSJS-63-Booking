@@ -1,8 +1,9 @@
-import {faCircleCheck} from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import axios from "../../api/axios";
+
+import { faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 
 import Modal from "../../components/Modal";
 
@@ -11,8 +12,8 @@ const ResetPassword = () => {
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-   const [success, setSuccess] = useState(true);
-   const [error, setError] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(false);
 
   const handelResetPassword = async (e) => {
     e.preventDefault();
@@ -21,28 +22,30 @@ const ResetPassword = () => {
         password,
         confirmPassword,
       });
-      console.log(response.data);
+      setSuccess(response.data.message)
+      setError(false)
     } catch (error) {
       if (error.response) {
         console.log(error.response.data.message);
-        setError(error.response.data.message)
+        setError(error.response.data.message);
+        setSuccess(false)
       } else {
         console.log(error.message);
       }
     }
   };
 
-    const props = {
-      title: "Reset Password",
-      icon: faCircleCheck,
-      iconClassName: "d-block mt-3 mx-auto text-success",
-      message: success,
-      headerClassName: `popup-head text-center bg-success text-white`,
-      btnClassName: `btn btn-outline-success `,
-      btnContent: "Close",
-      setSuccess,
-      setError,
-    };
+  const props = {
+    title: "Reset Password",
+    icon: faCircleCheck,
+    iconClassName: "d-block mt-3 mx-auto text-success",
+    message: success,
+    headerClassName: `popup-head text-center bg-success text-white`,
+    btnClassName: `btn btn-outline-success `,
+    btnContent: "Close",
+    setSuccess,
+    setError,
+  };
 
   return (
     <>
