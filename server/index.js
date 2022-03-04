@@ -1,12 +1,13 @@
 const express = require("express");
-const authRoutes = require("./routes/auth");
 const mongoose = require("mongoose");
-const dotenv = require("dotenv");
+const dotenv = require("dotenv").config();
+const cookieParser = require("cookie-parser");
+
+const routes = require("./routes/index.routes");
 
 const app = express();
-dotenv.config();
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 mongoose
   .connect(process.env.MONGO_URI, {
@@ -15,15 +16,15 @@ mongoose
   })
   .then(() => {
     console.log("Database connection Success.");
+    app.listen(PORT, () =>
+      console.log(`server running at http://localhost:${PORT}`)
+    );
   })
   .catch((err) => {
-    console.error("Mongo Connection Error", err);
+    console.log(err.message);
   });
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
-app.use("/", authRoutes);
-
-app.listen(PORT, () =>
-  console.log(`server running on http://localhost:${PORT}`)
-);
+app.use("/", routes);
