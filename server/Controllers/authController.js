@@ -155,7 +155,7 @@ const forgotPassword = async (req, res) => {
         <p style="margin-bottom: 10px;">Forgot password?</p>
         <p style="margin-bottom: 10px;">We receive a request to reset your password.</p>
         <p>to reset your password, Click on the button below:</p>
-        <a href="http://localhost:5000/password-reset/${token}" target="_blank" style="text-decoration: none;"><button style="text-align: center;text-decoration: none;background-color: #4eb5f1;color: #ffffff;border: 1px solid #4eb5f1;padding: 10px 30px;border-radius: 25px;display: block;margin: 20px;">Verify Now</button></a>
+        <a href="http://localhost:3000/reset-password/${token}" target="_blank" style="text-decoration: none;"><button style="text-align: center;text-decoration: none;background-color: #4eb5f1;color: #ffffff;border: 1px solid #4eb5f1;padding: 10px 30px;border-radius: 25px;display: block;margin: 20px;">Verify Now</button></a>
         <span>This verification will expire in 15 minutes.</span>
       </body>
     </html>`;
@@ -189,22 +189,24 @@ const resetPassword = async (req, res) => {
 
   const result = resetPasswordValidation(req.body);
   if (result.error)
-    res.status(400).json({ error: true, message: result.error.message });
+    return res.status(400).json({ error: true, message: result.error.message });
 
-    try {
-      const user = await User.findById(payload._id).select('_id');
-      const salt = await bcrypt.genSalt(10);
-      user.password = await bcrypt.hash(result.value.password, salt);
-      user.save((err, data) =>{
-        if(err) res.status(500).json({ error: true, message: err.message });
-        res.status(200).json({ error: true, message: 'password reset successfully' })
-      });
-    } catch (error) {
-      console.log(error.message)
-      return res.status(500).json({ error: true, message: error.message})
-    }
+  try {
+    const user = await User.findById(payload._id).select("_id");
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(result.value.password, salt);
+    user.save((err, data) => {
+      if (err)
+        return res.status(500).json({ error: true, message: err.message });
+      return res
+        .status(200)
+        .json({ error: true, message: "password reset successfully" });
+    });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ error: true, message: error.message });
+  }
 };
-
 
 const refreshToken = async (req, res) => {
   const cookie = req.cookies;
