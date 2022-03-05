@@ -29,19 +29,20 @@ function Login() {
 
   const handelLogin = async (e) => {
     e.preventDefault();
-    
     try {
-      const response = await axios.post('/login', user);
+      const response = await axios.post("/login", user, {
+        withCredentials: true,
+      });
       const { accessToken } = response.data;
       const payload = jwt_decode(accessToken);
       const { _id, email, firstName, lastName, role } = payload;
-
-      setAuth({ _id, email, firstName, lastName, role });
       const from = location.state?.from?.pathname
-        ? location.state?.from?.pathname
-        : role === "admin" || role === "owner"
-        ? "/dashboard"
-        : "/";
+      ? location.state?.from?.pathname
+      : role === "admin" || role === "owner"
+      ? "/dashboard"
+      : "/";
+
+      setAuth({ _id, email, firstName, lastName, role, accessToken });
       navigate(from, { replace: true });
     } catch (error) {
       if (error.response) {
