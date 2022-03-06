@@ -1,6 +1,13 @@
 import { Link } from "react-router-dom";
 
-function LoginForm({ handelLogin, email, handelChange, password }) {
+function LoginForm({
+  email,
+  password,
+  rememberMe,
+  setRememberMe,
+  handelChange,
+  handelLogin,
+}) {
   return (
     <form className="login-form" onSubmit={handelLogin}>
       <div className="mb-3">
@@ -15,7 +22,7 @@ function LoginForm({ handelLogin, email, handelChange, password }) {
           onChange={handelChange}
         />
       </div>
-      <div className="mb-3">
+      <div>
         <input
           className="form-control"
           type="password"
@@ -27,9 +34,20 @@ function LoginForm({ handelLogin, email, handelChange, password }) {
           onChange={handelChange}
         />
       </div>
-      <Link to="/forgot-password" className="d-block">
-        Forgot your password?
-      </Link>
+      <div className="d-flex">
+        <input
+          className="ms-2 me-1"
+          type="checkbox"
+          name="rememberMe"
+          id="rememberMe"
+          checked={rememberMe}
+          onChange={(e) => setRememberMe((prev) => !prev)}
+        />
+        <label htmlFor="rememberMe">Remember Me</label>
+        <Link to="/forgot-password" className="ms-auto">
+          Forgot your password?
+        </Link>
+      </div>
       <input className="mt-3" type="submit" value="SIGN IN" />
     </form>
   );
