@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 
@@ -16,6 +16,7 @@ function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState(null);
   const [user, setUser] = useState({ email: "", password: "" });
   const { email, password } = user;
@@ -27,6 +28,9 @@ function Login() {
     }));
   };
 
+  useEffect(() => {
+    localStorage.setItem("rememberMe", rememberMe);
+  }, [rememberMe]);
   const handelLogin = async (e) => {
     e.preventDefault();
     try {
@@ -70,6 +74,8 @@ function Login() {
           email={email}
           handelChange={handelChange}
           password={password}
+          rememberMe={rememberMe}
+          setRememberMe={setRememberMe}
         />
       </div>
       <div className="login-right">
