@@ -7,11 +7,9 @@ const cors = require("cors");
 const routes = require("./routes/index.routes");
 
 const app = express();
-app.use(cors());
-var corsOptions = {
-  origin: "http://localhost:3000",
-  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-};
+
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+
 const PORT = process.env.PORT || 5000;
 
 mongoose
